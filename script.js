@@ -152,9 +152,20 @@ function watchAdToComplete() {
   }
 }
 
-// ✅ MODIFIED: Reset now handled by Kodular via webview signal
 function resetProgress() {
-  window.location.href = "reset-confirm";
+  unlockedLevels = [1];
+  bestTimes = {};
+  localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+  localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+  renderLevelButtons();
+  levelDisplay.textContent = '';
+  container.innerHTML = '';
+
+  if (typeof window.AppInventor !== "undefined") {
+    window.AppInventor.setWebViewString("progress-reset");
+  }
+
+  alert("Progress reset.");
 }
 
 function restartLevel() {

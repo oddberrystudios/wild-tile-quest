@@ -1,5 +1,3 @@
-// script.js (updated background image fix)
-
 const container = document.getElementById("puzzle-container");
 const levelButtonsContainer = document.getElementById("level-buttons");
 const levelDisplay = document.getElementById("current-level");
@@ -154,17 +152,9 @@ function watchAdToComplete() {
   }
 }
 
+// ✅ MODIFIED: Reset now handled by Kodular via webview signal
 function resetProgress() {
-  if (confirm("Reset all progress?")) {
-    unlockedLevels = [1];
-    bestTimes = {};
-    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
-    renderLevelButtons();
-    levelDisplay.textContent = '';
-    container.innerHTML = '';
-    alert("Progress reset.");
-  }
+  window.location.href = "reset-confirm";
 }
 
 function restartLevel() {

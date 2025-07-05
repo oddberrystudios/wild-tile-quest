@@ -52,7 +52,7 @@ function startLevel(level) {
 
   timerStart = Date.now();
 
-  watchAdBtn.disabled = unlockedLevels.includes(level + 1) || currentLevel >= maxLevel;
+  watchAdBtn.disabled = unlockedLevels.includes(level + 1);
   previewImage.src = `images/level${level}.jpg`;
   previewImage.style.display = 'block';
 }
@@ -139,22 +139,16 @@ function checkWin(level) {
   }
 }
 
-// ✅ FIXED: Prevent GitHub redirect when on final level
 function watchAdToComplete() {
-  if (currentLevel >= maxLevel) {
-    alert("You've already completed the final level!");
-    return false;
-  }
-
-  if (!unlockedLevels.includes(currentLevel + 1)) {
+  if (currentLevel < maxLevel && !unlockedLevels.includes(currentLevel + 1)) {
     if (typeof window.AppInventor !== "undefined") {
       window.AppInventor.setWebViewString("ad-skipped");
+    } else {
+      unlockedLevels.push(currentLevel + 1);
+      localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+      renderLevelButtons();
+      startLevel(currentLevel + 1);
     }
-    unlockedLevels.push(currentLevel + 1);
-    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    watchAdBtn.disabled = true;
-    renderLevelButtons();
-    startLevel(currentLevel + 1);
   } else {
     alert("This level is already completed or unlocked.");
   }
@@ -162,7 +156,6 @@ function watchAdToComplete() {
   return false;
 }
 
-// ✅ Works with Kodular
 function resetProgress() {
   if (typeof window.AppInventor !== "undefined") {
     window.AppInventor.setWebViewString("reset-confirm");
@@ -176,20 +169,28 @@ function resetProgress() {
     container.innerHTML = '';
     alert("Progress reset.");
   }
+
+  return false;
 }
 
 function restartLevel() {
   if (confirm("Restart current level?")) {
     startLevel(currentLevel);
   }
+
+  return false;
 }
 
 function goBackToLevels() {
   document.getElementById('puzzle-screen').style.display = 'none';
   showLevelSelect();
+
+  return false;
 }
 
 function goBackToStart() {
   document.getElementById('level-select-screen').style.display = 'none';
   document.getElementById('start-screen').style.display = 'block';
+
+  return false;
 }

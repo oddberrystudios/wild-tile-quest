@@ -52,7 +52,7 @@ function startLevel(level) {
 
   timerStart = Date.now();
 
-  watchAdBtn.disabled = unlockedLevels.includes(level + 1);
+  watchAdBtn.disabled = unlockedLevels.includes(level + 1) || currentLevel >= maxLevel;
   previewImage.src = `images/level${level}.jpg`;
   previewImage.style.display = 'block';
 }
@@ -139,9 +139,17 @@ function checkWin(level) {
   }
 }
 
+// ✅ FIXED: Prevent GitHub redirect when on final level
 function watchAdToComplete() {
-  if (currentLevel < maxLevel && !unlockedLevels.includes(currentLevel + 1)) {
-    window.AppInventor.setWebViewString("ad-skipped");
+  if (currentLevel >= maxLevel) {
+    alert("You've already completed the final level!");
+    return false;
+  }
+
+  if (!unlockedLevels.includes(currentLevel + 1)) {
+    if (typeof window.AppInventor !== "undefined") {
+      window.AppInventor.setWebViewString("ad-skipped");
+    }
     unlockedLevels.push(currentLevel + 1);
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     watchAdBtn.disabled = true;
@@ -150,22 +158,24 @@ function watchAdToComplete() {
   } else {
     alert("This level is already completed or unlocked.");
   }
+
+  return false;
 }
 
+// ✅ Works with Kodular
 function resetProgress() {
-  unlockedLevels = [1];
-  bestTimes = {};
-  localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-  localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
-  renderLevelButtons();
-  levelDisplay.textContent = '';
-  container.innerHTML = '';
-
   if (typeof window.AppInventor !== "undefined") {
-    window.AppInventor.setWebViewString("progress-reset");
+    window.AppInventor.setWebViewString("reset-confirm");
+  } else {
+    unlockedLevels = [1];
+    bestTimes = {};
+    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+    localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+    renderLevelButtons();
+    levelDisplay.textContent = '';
+    container.innerHTML = '';
+    alert("Progress reset.");
   }
-
-  alert("Progress reset.");
 }
 
 function restartLevel() {

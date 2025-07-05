@@ -39,9 +39,7 @@ function startLevel(level) {
   document.getElementById('puzzle-screen').style.display = 'block';
 
   currentLevel = level;
-  if (level <= 5) size = 3;
-  else if (level <= 10) size = 4;
-  else size = 5;
+  size = level <= 5 ? 3 : level <= 10 ? 4 : 5;
 
   totalTiles = size * size;
   emptyTile = totalTiles - 1;
@@ -64,8 +62,8 @@ function renderPuzzle(level) {
   for (let i = 0; i < totalTiles; i++) {
     const tile = document.createElement('div');
     tile.className = 'tile';
-
     const pos = positions[i];
+
     if (pos === emptyTile) {
       tile.classList.add('hidden');
     } else {
@@ -112,9 +110,7 @@ function checkWin(level) {
   const isSolved = positions.every((val, idx) => val === idx);
   if (isSolved) {
     const timeTaken = Math.floor((Date.now() - timerStart) / 1000);
-    let stars = 1;
-    if (timeTaken <= 30) stars = 3;
-    else if (timeTaken <= 60) stars = 2;
+    let stars = timeTaken <= 30 ? 3 : timeTaken <= 60 ? 2 : 1;
 
     alert(`🎉 You completed Level ${level} in ${timeTaken}s.\nYou earned ${stars}⭐`);
     confetti.style.display = 'block';
@@ -139,58 +135,29 @@ function checkWin(level) {
   }
 }
 
+// ✅ FOR KODULAR: Send signal to app, no GitHub URL popup
 function watchAdToComplete() {
   if (currentLevel < maxLevel && !unlockedLevels.includes(currentLevel + 1)) {
-    if (typeof window.AppInventor !== "undefined") {
-      window.AppInventor.setWebViewString("ad-skipped");
-    } else {
-      unlockedLevels.push(currentLevel + 1);
-      localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-      renderLevelButtons();
-      startLevel(currentLevel + 1);
-    }
+    window.AppInventor.setWebViewString("ad-skipped");
   } else {
     alert("This level is already completed or unlocked.");
   }
-
-  return false;
 }
 
 function resetProgress() {
-  if (typeof window.AppInventor !== "undefined") {
-    window.AppInventor.setWebViewString("reset-confirm");
-  } else {
-    unlockedLevels = [1];
-    bestTimes = {};
-    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
-    renderLevelButtons();
-    levelDisplay.textContent = '';
-    container.innerHTML = '';
-    alert("Progress reset.");
-  }
-
-  return false;
+  window.AppInventor.setWebViewString("reset-confirm");
 }
 
 function restartLevel() {
-  if (confirm("Restart current level?")) {
-    startLevel(currentLevel);
-  }
-
-  return false;
+  window.AppInventor.setWebViewString("restart-confirm");
 }
 
 function goBackToLevels() {
   document.getElementById('puzzle-screen').style.display = 'none';
   showLevelSelect();
-
-  return false;
 }
 
 function goBackToStart() {
   document.getElementById('level-select-screen').style.display = 'none';
   document.getElementById('start-screen').style.display = 'block';
-
-  return false;
 }

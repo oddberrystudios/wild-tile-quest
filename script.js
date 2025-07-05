@@ -143,7 +143,7 @@ function checkWin(level) {
 
 function watchAdToComplete() {
   if (currentLevel < maxLevel && !unlockedLevels.includes(currentLevel + 1)) {
-    alert("✅ You watched an ad! Level skipped.");
+    window.AppInventor.setWebViewString("ad-skipped");
     unlockedLevels.push(currentLevel + 1);
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     watchAdBtn.disabled = true;

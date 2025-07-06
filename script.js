@@ -133,8 +133,8 @@ function checkWin(level) {
     watchAdBtn.disabled = true;
     renderLevelButtons();
 
-    // ✅ Avoid external links — signal app to proceed to next level
-    if (unlockedLevels.includes(level + 1)) {
+    // ✅ Instead of auto-starting, signal Kodular to trigger it
+    if (level < maxLevel) {
       window.AppInventor.setWebViewString("manual-complete");
     }
   }
@@ -142,25 +142,24 @@ function checkWin(level) {
 
 function watchAdToComplete() {
   if (currentLevel < maxLevel && !unlockedLevels.includes(currentLevel + 1)) {
-    window.AppInventor.setWebViewString("ad-skipped");
     unlockedLevels.push(currentLevel + 1);
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     watchAdBtn.disabled = true;
     renderLevelButtons();
-    startLevel(currentLevel + 1);
+
+    // ✅ Tell Kodular to move to next level safely
+    window.AppInventor.setWebViewString("ad-skipped");
   } else {
-    alert("This level is already completed or unlocked.");
+    alert("This level is already completed or max level reached.");
   }
 }
 
-// ✅ No popup: trigger reset via Kodular block
 function resetProgress() {
-  window.AppInventor.setWebViewString("reset-progress");
+  window.AppInventor.setWebViewString("reset-confirm");
 }
 
-// ✅ No popup: trigger restart via Kodular block
 function restartLevel() {
-  window.AppInventor.setWebViewString("restart-level");
+  window.AppInventor.setWebViewString("restart-confirm");
 }
 
 function goBackToLevels() {

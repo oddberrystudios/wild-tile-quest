@@ -116,9 +116,8 @@ function checkWin(level) {
     if (timeTaken <= 30) stars = 3;
     else if (timeTaken <= 60) stars = 2;
 
-    alert(`🎉 You completed Level ${level} in ${timeTaken}s.\nYou earned ${stars}⭐`);
     confetti.style.display = 'block';
-    setTimeout(() => confetti.style.display = 'none', 2000);
+    setTimeout(() => confetti.style.display = 'none', 1500);
 
     if (!bestTimes[level] || timeTaken < bestTimes[level]) {
       bestTimes[level] = timeTaken;
@@ -133,9 +132,8 @@ function checkWin(level) {
     watchAdBtn.disabled = true;
     renderLevelButtons();
 
-    // ✅ Instead of auto-starting, signal Kodular to trigger it
-    if (level < maxLevel) {
-      window.AppInventor.setWebViewString("manual-complete");
+    if (unlockedLevels.includes(level + 1)) {
+      setTimeout(() => startLevel(level + 1), 1000);
     }
   }
 }
@@ -146,20 +144,22 @@ function watchAdToComplete() {
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     watchAdBtn.disabled = true;
     renderLevelButtons();
-
-    // ✅ Tell Kodular to move to next level safely
-    window.AppInventor.setWebViewString("ad-skipped");
-  } else {
-    alert("This level is already completed or max level reached.");
+    startLevel(currentLevel + 1);
   }
 }
 
 function resetProgress() {
-  window.AppInventor.setWebViewString("reset-confirm");
+  unlockedLevels = [1];
+  bestTimes = {};
+  localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+  localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+  renderLevelButtons();
+  levelDisplay.textContent = '';
+  container.innerHTML = '';
 }
 
 function restartLevel() {
-  window.AppInventor.setWebViewString("restart-confirm");
+  startLevel(currentLevel);
 }
 
 function goBackToLevels() {

@@ -39,13 +39,17 @@ function startLevel(level) {
   document.getElementById('puzzle-screen').style.display = 'block';
 
   currentLevel = level;
-  size = level <= 5 ? 3 : level <= 10 ? 4 : 5;
+  if (level <= 5) size = 3;
+  else if (level <= 10) size = 4;
+  else size = 5;
+
   totalTiles = size * size;
   emptyTile = totalTiles - 1;
   positions = [...Array(totalTiles).keys()];
   shuffle();
   renderPuzzle(level);
   levelDisplay.textContent = `Playing Level ${level}`;
+
   timerStart = Date.now();
 
   watchAdBtn.disabled = unlockedLevels.includes(level + 1);
@@ -60,6 +64,7 @@ function renderPuzzle(level) {
   for (let i = 0; i < totalTiles; i++) {
     const tile = document.createElement('div');
     tile.className = 'tile';
+
     const pos = positions[i];
     if (pos === emptyTile) {
       tile.classList.add('hidden');
@@ -70,6 +75,7 @@ function renderPuzzle(level) {
       tile.style.backgroundSize = `${size * 100}px ${size * 100}px`;
       tile.style.backgroundPosition = `-${(col * 100)}px -${(row * 100)}px`;
     }
+
     tile.addEventListener('click', () => tryMove(i, level));
     container.appendChild(tile);
   }
@@ -92,8 +98,8 @@ function isAdjacent(i, j) {
 
 function shuffle() {
   for (let i = 0; i < 100; i++) {
-    const empty = positions.indexOf(emptyTile);
     const movable = [];
+    const empty = positions.indexOf(emptyTile);
     for (let j = 0; j < totalTiles; j++) {
       if (isAdjacent(j, empty)) movable.push(j);
     }
@@ -106,6 +112,13 @@ function checkWin(level) {
   const isSolved = positions.every((val, idx) => val === idx);
   if (isSolved) {
     const timeTaken = Math.floor((Date.now() - timerStart) / 1000);
+    let stars = 1;
+    if (timeTaken <= 30) stars = 3;
+    else if (timeTaken <= 60) stars = 2;
+
+    confetti.style.display = 'block';
+    setTimeout(() => confetti.style.display = 'none', 1500);
+
     if (!bestTimes[level] || timeTaken < bestTimes[level]) {
       bestTimes[level] = timeTaken;
       localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
@@ -116,23 +129,13 @@ function checkWin(level) {
       localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     }
 
-    showCongratsMessage(level);
-  }
-}
+    watchAdBtn.disabled = true;
+    renderLevelButtons();
 
-function showCongratsMessage(level) {
-  confetti.style.display = 'block';
-  levelDisplay.textContent = `🎉 Congratulations! You completed Level ${level}`;
-  setTimeout(() => {
-    confetti.style.display = 'none';
-    if (level < maxLevel) {
-      startLevel(level + 1);
-    } else {
-      levelDisplay.textContent = "🎉 Congratulations! You completed the entire game!";
-      previewImage.style.display = 'none';
-      container.innerHTML = '';
+    if (unlockedLevels.includes(level + 1)) {
+      setTimeout(() => startLevel(level + 1), 1000);
     }
-  }, 2000);
+  }
 }
 
 function watchAdToComplete() {
@@ -141,27 +144,18 @@ function watchAdToComplete() {
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     watchAdBtn.disabled = true;
     renderLevelButtons();
-    showCongratsMessage(currentLevel);
-  } else if (currentLevel === maxLevel) {
-    showCongratsMessage(currentLevel);
-  } else {
-    levelDisplay.textContent = "Already unlocked!";
+    startLevel(currentLevel + 1);
   }
 }
 
 function resetProgress() {
-  if (confirm("Are you sure you want to reset all progress?")) {
-    unlockedLevels = [1];
-    bestTimes = {};
-    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
-    renderLevelButtons();
-    levelDisplay.textContent = '';
-    container.innerHTML = '';
-    previewImage.style.display = 'none';
-    watchAdBtn.disabled = false;
-    alert("Progress has been reset.");
-  }
+  unlockedLevels = [1];
+  bestTimes = {};
+  localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+  localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+  renderLevelButtons();
+  levelDisplay.textContent = '';
+  container.innerHTML = '';
 }
 
 function restartLevel() {

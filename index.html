@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wild Tile Quest - Rotate Puzzle</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="start-screen">
-    <h1>🌀 Wild Tile Quest</h1>
-    <button onclick="showLevelSelect()">Start Game</button>
+    <h1>🔄 Rotate Puzzle Quest</h1>
+    <button onclick="showLevelSelect()">🎮 Start Game</button>
     <p class="credits">© 2025 Oddberry Studios</p>
   </div>
 
   <div id="level-select-screen" style="display:none;">
-    <h2>Select Level</h2>
+    <h2>📜 Select Level</h2>
     <div id="level-buttons"></div>
-    <button onclick="resetProgress()">🔄 Reset Progress</button>
+    <button id="reset-btn" onclick="resetProgress()">🔄 Reset Progress</button>
     <button onclick="goBackToStart()">🔙 Back</button>
   </div>
 
@@ -25,9 +25,10 @@
     <div id="puzzle-container"></div>
     <div id="confetti">🎉</div>
     <button onclick="restartLevel()">🔁 Restart</button>
+    <button onclick="watchAdToGuide()">🎥 Show Hint</button>
     <button onclick="goBackToLevels()">🔙 Back</button>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>

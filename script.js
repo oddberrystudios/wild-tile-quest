@@ -1,70 +1,66 @@
+const container = document.getElementById("puzzle-container");
 const levelButtonsContainer = document.getElementById("level-buttons");
-const puzzleContainer = document.getElementById("puzzle-container");
 const levelDisplay = document.getElementById("current-level");
 const confetti = document.getElementById("confetti");
 
-let currentLevel = 1;
-let maxLevel = 15;
 let unlockedLevels = JSON.parse(localStorage.getItem("unlockedLevels") || "[1]");
+const maxLevel = 15;
+let currentLevel = 1;
 
 function showLevelSelect() {
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("level-select-screen").style.display = "block";
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('level-select-screen').style.display = 'block';
   renderLevelButtons();
 }
 
 function renderLevelButtons() {
   levelButtonsContainer.innerHTML = '';
-  for (let i = 1; i <= maxLevel; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = "Level " + i;
-    btn.disabled = !unlockedLevels.includes(i);
-    btn.onclick = () => startLevel(i);
+  for (let level = 1; level <= maxLevel; level++) {
+    const btn = document.createElement('button');
+    btn.textContent = `Level ${level}`;
+    btn.className = 'level-btn';
+    if (!unlockedLevels.includes(level)) {
+      btn.classList.add('locked');
+      btn.disabled = true;
+    }
+    btn.onclick = () => startLevel(level);
     levelButtonsContainer.appendChild(btn);
   }
 }
 
 function startLevel(level) {
   currentLevel = level;
-  document.getElementById("level-select-screen").style.display = "none";
-  document.getElementById("puzzle-screen").style.display = "block";
-  levelDisplay.textContent = "Playing Level " + level;
-
-  const img = new Image();
-  img.src = `images/level${level}.jpg`;
-  img.onload = () => buildPuzzle(img);
+  document.getElementById('level-select-screen').style.display = 'none';
+  document.getElementById('puzzle-screen').style.display = 'block';
+  levelDisplay.textContent = `Playing Level ${level}`;
+  generateTiles();
 }
 
-function buildPuzzle(img) {
-  puzzleContainer.innerHTML = '';
-  const size = 3;
-  const tileSize = 100;
+function generateTiles() {
+  container.innerHTML = '';
+  container.style.gridTemplateColumns = `repeat(3, 1fr)`;
 
-  for (let i = 0; i < size * size; i++) {
+  let rotations = [];
+  for (let i = 0; i < 9; i++) {
     const tile = document.createElement("div");
     tile.className = "tile";
-    const row = Math.floor(i / size);
-    const col = i % size;
-    tile.style.backgroundImage = `url(${img.src})`;
-    tile.style.backgroundPosition = `-${col * tileSize}px -${row * tileSize}px`;
-    tile.dataset.rotation = Math.floor(Math.random() * 4) * 90;
-    tile.style.transform = `rotate(${tile.dataset.rotation}deg)`;
+
+    let rotateDeg = Math.floor(Math.random() * 4) * 90;
+    rotations.push(rotateDeg);
+    tile.style.transform = `rotate(${rotateDeg}deg)`;
 
     tile.onclick = () => {
-      tile.dataset.rotation = (parseInt(tile.dataset.rotation) + 90) % 360;
-      tile.style.transform = `rotate(${tile.dataset.rotation}deg)`;
-      checkSolved();
+      rotations[i] = (rotations[i] + 90) % 360;
+      tile.style.transform = `rotate(${rotations[i]}deg)`;
+      checkSolved(rotations);
     };
 
-    puzzleContainer.appendChild(tile);
+    container.appendChild(tile);
   }
 }
 
-function checkSolved() {
-  const tiles = document.querySelectorAll(".tile");
-  const allCorrect = Array.from(tiles).every(tile => parseInt(tile.dataset.rotation) === 0);
-
-  if (allCorrect) {
+function checkSolved(rotations) {
+  if (rotations.every(r => r === 0)) {
     confetti.style.display = 'block';
     setTimeout(() => confetti.style.display = 'none', 1500);
 
@@ -73,7 +69,22 @@ function checkSolved() {
       localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
     }
 
-    setTimeout(() => startLevel(currentLevel + 1), 1200);
+    renderLevelButtons();
+    setTimeout(() => startLevel(currentLevel + 1), 1000);
+  }
+}
+
+function watchAdToGuide() {
+  alert("Hint: Tap tiles to rotate. Make all images upright to win!");
+}
+
+function resetProgress() {
+  if (confirm("Reset all progress?")) {
+    unlockedLevels = [1];
+    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
+    renderLevelButtons();
+    levelDisplay.textContent = '';
+    container.innerHTML = '';
   }
 }
 
@@ -82,19 +93,11 @@ function restartLevel() {
 }
 
 function goBackToLevels() {
-  document.getElementById("puzzle-screen").style.display = "none";
+  document.getElementById('puzzle-screen').style.display = 'none';
   showLevelSelect();
 }
 
 function goBackToStart() {
-  document.getElementById("level-select-screen").style.display = "none";
-  document.getElementById("start-screen").style.display = "block";
-}
-
-function resetProgress() {
-  if (confirm("Reset all progress?")) {
-    unlockedLevels = [1];
-    localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    renderLevelButtons();
-  }
+  document.getElementById('level-select-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
 }

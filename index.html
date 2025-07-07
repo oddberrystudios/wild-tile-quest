@@ -7,22 +7,19 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Start Screen -->
   <div id="start-screen">
     <h1>🐾 Wild Tile Quest</h1>
     <button onclick="showLevelSelect()">🎮 Start Game</button>
     <p class="credits">© 2025 Oddberry Studios</p>
   </div>
 
-  <!-- Level Select Screen -->
   <div id="level-select-screen" style="display:none;">
     <h2>🔓 Select Level</h2>
     <div id="level-buttons"></div>
-    <button id="reset-btn" onclick="resetProgress()">🔄 Reset Progress</button>
+    <button onclick="resetProgress()">🔄 Reset Progress</button>
     <button onclick="goBackToStart()">🔙 Back</button>
   </div>
 
-  <!-- Puzzle Screen -->
   <div id="puzzle-screen" style="display:none;">
     <h2 id="current-level"></h2>
     <img id="preview-image" class="preview" alt="Preview" />
@@ -33,7 +30,6 @@
     <button onclick="goBackToLevels()">🔙 Back</button>
   </div>
 
-  <!-- JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>

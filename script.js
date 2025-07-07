@@ -97,15 +97,35 @@ function isAdjacent(i, j) {
 }
 
 function shuffle() {
-  for (let i = 0; i < 100; i++) {
-    const movable = [];
-    const empty = positions.indexOf(emptyTile);
-    for (let j = 0; j < totalTiles; j++) {
-      if (isAdjacent(j, empty)) movable.push(j);
+  let shuffled = false;
+  while (!shuffled) {
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
     }
-    const rand = movable[Math.floor(Math.random() * movable.length)];
-    [positions[empty], positions[rand]] = [positions[rand], positions[empty]];
+    shuffled = isSolvable(positions);
   }
+}
+
+// ✅ Makes sure puzzle is solvable
+function isSolvable(puzzle) {
+  const invCount = getInversionCount(puzzle.filter(n => n !== emptyTile));
+  if (size % 2 !== 0) {
+    return invCount % 2 === 0;
+  } else {
+    const rowFromBottom = size - Math.floor(puzzle.indexOf(emptyTile) / size);
+    return (invCount + rowFromBottom) % 2 === 0;
+  }
+}
+
+function getInversionCount(arr) {
+  let invCount = 0;
+  for (let i = 0; i < arr.length - 1; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[i] > arr[j]) invCount++;
+    }
+  }
+  return invCount;
 }
 
 function checkWin(level) {

@@ -12,6 +12,7 @@ let size = 3;
 let totalTiles, emptyTile, positions = [], timerStart = null;
 let currentLevel = 1;
 const maxLevel = 15;
+let solutionSteps = [];
 
 function showLevelSelect() {
   document.getElementById('start-screen').style.display = 'none';
@@ -45,14 +46,12 @@ function startLevel(level) {
 
   totalTiles = size * size;
   emptyTile = totalTiles - 1;
-  positions = [...Array(totalTiles).keys()];
-  shuffleSolvable(); // Ensures puzzle is solvable
+  generateSolvablePuzzle();
   renderPuzzle(level);
   levelDisplay.textContent = `Playing Level ${level}`;
 
   timerStart = Date.now();
-
-  watchAdBtn.disabled = unlockedLevels.includes(level + 1);
+  watchAdBtn.disabled = false;
   previewImage.src = `images/level${level}.jpg`;
   previewImage.style.display = 'block';
 }
@@ -96,29 +95,22 @@ function isAdjacent(i, j) {
   return Math.abs(xi - xj) + Math.abs(yi - yj) === 1;
 }
 
-function shuffleSolvable() {
-  do {
-    shuffle();
-  } while (!isSolvable(positions));
-}
+// New: Generate solvable puzzle by making random moves from solved state
+function generateSolvablePuzzle() {
+  positions = [...Array(totalTiles).keys()];
+  solutionSteps = [];
+  let emptyIndex = totalTiles - 1;
 
-function shuffle() {
-  for (let i = positions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]];
-  }
-}
-
-function isSolvable(arr) {
-  let invCount = 0;
-  for (let i = 0; i < arr.length - 1; i++) {
-    for (let j = i + 1; j < arr.length; j++) {
-      if (arr[i] !== emptyTile && arr[j] !== emptyTile && arr[i] > arr[j]) invCount++;
+  for (let i = 0; i < 40; i++) {
+    const adjacent = [];
+    for (let j = 0; j < totalTiles; j++) {
+      if (isAdjacent(j, emptyIndex)) adjacent.push(j);
     }
+    const moveIndex = adjacent[Math.floor(Math.random() * adjacent.length)];
+    [positions[emptyIndex], positions[moveIndex]] = [positions[moveIndex], positions[emptyIndex]];
+    solutionSteps.push({ from: moveIndex, to: emptyIndex }); // record move
+    emptyIndex = moveIndex;
   }
-  if (size % 2 === 1) return invCount % 2 === 0;
-  const emptyRow = Math.floor(arr.indexOf(emptyTile) / size);
-  return (invCount + size - emptyRow) % 2 === 0;
 }
 
 function checkWin(level) {
@@ -145,55 +137,36 @@ function checkWin(level) {
     watchAdBtn.disabled = true;
     renderLevelButtons();
 
-    if (unlockedLevels.includes(level + 1)) {
+    if (level < maxLevel) {
       setTimeout(() => startLevel(level + 1), 1000);
-    } else if (level === maxLevel) {
-      alert("🎉 You completed the final level!\nThanks for playing Wild Tile Quest.");
+    } else {
+      alert("🎉 Congratulations! You've completed all levels.");
     }
   }
 }
 
-// Demo: Move tiles automatically to solve (tutorial-style)
-function moveTile(fromIndex, toIndex, delay = 350) {
-  return new Promise(resolve => {
-    [positions[fromIndex], positions[toIndex]] = [positions[toIndex], positions[fromIndex]];
-    renderPuzzle(currentLevel);
-    setTimeout(resolve, delay);
-  });
-}
+// 🧠 Instead of skipping — play the solution tutorial step-by-step
+async function watchAdToComplete() {
+  alert("🎥 You watched an ad. Here's how to solve this level!");
 
-async function solvePuzzleAnimation() {
-  alert("🎯 Watch how to solve this level step by step...");
-  positions = [...Array(totalTiles).keys()];
+  // Reset to original scrambled state
+  generateSolvablePuzzle();
   renderPuzzle(currentLevel);
 
-  await new Promise(res => setTimeout(res, 1000));
-}
+  // Play recorded solution steps in reverse
+  const reversedSteps = [...solutionSteps].reverse();
 
-async function watchAdToComplete() {
-  if (currentLevel <= maxLevel) {
-    alert("🎥 Ad watched successfully!");
-    await solvePuzzleAnimation();
-
-    // Optional unlock
-    if (!unlockedLevels.includes(currentLevel + 1) && currentLevel < maxLevel) {
-      unlockedLevels.push(currentLevel + 1);
-      localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
-    }
-
-    watchAdBtn.disabled = true;
-    renderLevelButtons();
-
-    if (currentLevel < maxLevel) {
-      setTimeout(() => startLevel(currentLevel + 1), 2000);
-    } else {
-      alert("🎉 Game Completed! No more levels.");
-    }
+  for (let step of reversedSteps) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    [positions[step.from], positions[step.to]] = [positions[step.to], positions[step.from]];
+    renderPuzzle(currentLevel);
   }
+
+  alert("🎯 Now try it yourself!");
 }
 
 function resetProgress() {
-  if (confirm("⚠️ Are you sure you want to reset all progress?")) {
+  if (confirm("Reset all progress?")) {
     unlockedLevels = [1];
     bestTimes = {};
     localStorage.setItem("unlockedLevels", JSON.stringify(unlockedLevels));
@@ -206,7 +179,7 @@ function resetProgress() {
 }
 
 function restartLevel() {
-  if (confirm("🔁 Restart this level?")) {
+  if (confirm("Restart level?")) {
     startLevel(currentLevel);
   }
 }

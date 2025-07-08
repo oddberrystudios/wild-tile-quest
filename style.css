@@ -1,6 +1,6 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #fff;
+  background: #fefefe;
   text-align: center;
   margin: 0;
   padding: 0;
@@ -43,21 +43,29 @@ button.locked {
 
 #puzzle-container {
   display: grid;
-  max-width: 300px;
+  max-width: 320px;
   margin: 20px auto;
-  gap: 4px;
+  gap: 5px;
 }
 
 .tile {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background-color: #ccc;
-  background-image: url('images/sample.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: cover;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   transform: rotate(0deg);
-  transition: transform 0.2s ease;
-  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  transition: transform 0.3s;
+}
+
+.preview {
+  width: 120px;
+  border: 2px solid #555;
+  border-radius: 6px;
+  margin: 10px auto;
+  display: block;
 }
 
 #confetti {
